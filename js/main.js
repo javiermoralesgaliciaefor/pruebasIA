@@ -25,7 +25,8 @@ function dibujarCombate(canvas, opciones) {
     // Jugador
     ctx.save();
     ctx.beginPath();
-    ctx.arc(canvas.width * 0.25, canvas.height * 0.65, 38, 0, 2 * Math.PI);
+    let offset = opciones?.offset || 0;
+    ctx.arc(canvas.width * 0.25 + (offset || 0), canvas.height * 0.65, 38, 0, 2 * Math.PI);
     ctx.fillStyle = opciones?.jugadorColor || '#ffcb05';
     ctx.shadowColor = '#333';
     ctx.shadowBlur = 12;
@@ -34,7 +35,7 @@ function dibujarCombate(canvas, opciones) {
     // Oponente
     ctx.save();
     ctx.beginPath();
-    ctx.arc(canvas.width * 0.75, canvas.height * 0.25, 38, 0, 2 * Math.PI);
+    ctx.arc(canvas.width * 0.75 - (offset || 0), canvas.height * 0.25, 38, 0, 2 * Math.PI);
     ctx.fillStyle = opciones?.oponenteColor || '#3b4cca';
     ctx.shadowColor = '#222';
     ctx.shadowBlur = 12;
@@ -295,6 +296,75 @@ function actualizarTurnos() {
         setTimeout(turnoOponente, 600); // Pequeña pausa para UX
     }
     envTurnoAnterior = estadoCombate.turnoActual;
+}
+
+// Animación de ataque en Canvas
+function animarAtaqueCanvas({ atacante, objetivo, tipo = 'linea', callback }) {
+    // atacante: 'jugador' u 'oponente'
+    // tipo: 'linea', 'parpadeo', 'desplazamiento'
+    // callback: función a llamar al terminar la animación
+    const idxAtacante = atacante === 'jugador' ? 0 : 1;
+    const idxObjetivo = atacante === 'jugador' ? 1 : 0;
+    const canvas = document.querySelectorAll('.battlefield canvas')[idxObjetivo];
+    if (!canvas) { if (callback) callback(); return; }
+    const ctx = canvas.getContext('2d');
+    let frame = 0;
+    const maxFrames = 18;
+    let animInterval;
+
+    if (tipo === 'linea') {
+        // Línea de energía que va del atacante al objetivo
+        animInterval = setInterval(() => {
+            dibujarCombate(canvas, idxObjetivo === 0 ? {jugadorColor:'#ffcb05', oponenteColor:'#3b4cca'} : {jugadorColor:'#3b4cca', oponenteColor:'#ffcb05'});
+            ctx.save();
+            ctx.strokeStyle = `rgba(255,0,0,${0.7 - frame*0.03})`;
+            ctx.lineWidth = 4 + Math.sin(frame/2)*2;
+            ctx.beginPath();
+            if (atacante === 'jugador') {
+                ctx.moveTo(canvas.width * 0.25, canvas.height * 0.65);
+                ctx.lineTo(canvas.width * 0.75, canvas.height * 0.25);
+            } else {
+                ctx.moveTo(canvas.width * 0.75, canvas.height * 0.25);
+                ctx.lineTo(canvas.width * 0.25, canvas.height * 0.65);
+            }
+            ctx.stroke();
+            ctx.restore();
+            frame++;
+            if (frame > maxFrames) { clearInterval(animInterval); if (callback) callback(); }
+        }, 22);
+    } else if (tipo === 'parpadeo') {
+        // Parpadeo del sprite objetivo
+        animInterval = setInterval(() => {
+            dibujarCombate(canvas, idxObjetivo === 0 ? {jugadorColor:'#ffcb05', oponenteColor:'#3b4cca'} : {jugadorColor:'#3b4cca', oponenteColor:'#ffcb05'});
+            if (frame % 2 === 0) {
+                ctx.save();
+                ctx.globalAlpha = 0.2;
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                if (idxObjetivo === 0) {
+                    ctx.arc(canvas.width * 0.25, canvas.height * 0.65, 38, 0, 2 * Math.PI);
+                } else {
+                    ctx.arc(canvas.width * 0.75, canvas.height * 0.25, 38, 0, 2 * Math.PI);
+                }
+                ctx.fill();
+                ctx.restore();
+            }
+            frame++;
+            if (frame > maxFrames) { clearInterval(animInterval); if (callback) callback(); }
+        }, 40);
+    } else if (tipo === 'desplazamiento') {
+        // Sprite atacante se desplaza hacia el objetivo y regresa
+        const canvasAtacante = document.querySelectorAll('.battlefield canvas')[idxAtacante];
+        let dir = 1;
+        animInterval = setInterval(() => {
+            let offset = dir * (frame < maxFrames/2 ? frame : maxFrames-frame) * 4;
+            dibujarCombate(canvasAtacante, idxAtacante === 0 ? {jugadorColor:'#ffcb05', oponenteColor:'#3b4cca', offset: offset} : {jugadorColor:'#3b4cca', oponenteColor:'#ffcb05', offset: offset});
+            frame++;
+            if (frame > maxFrames) { clearInterval(animInterval); dibujarCombate(canvasAtacante, idxAtacante === 0 ? {jugadorColor:'#ffcb05', oponenteColor:'#3b4cca'} : {jugadorColor:'#3b4cca', oponenteColor:'#ffcb05'}); if (callback) callback(); }
+        }, 18);
+    } else {
+        if (callback) callback();
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
