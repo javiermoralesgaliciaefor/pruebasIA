@@ -227,10 +227,32 @@ estadoCombate.oponente.ataques = [
     }
 ];
 
-// Elegir ataque al azar
+// Elegir ataque del oponente según efectividad y estado del jugador
 function elegirAtaqueOponente() {
     const ataques = estadoCombate.oponente.ataques;
-    return ataques[Math.floor(Math.random() * ataques.length)];
+    // Si el jugador no está paralizado ni dormido, priorizar ataques de estado
+    if (estadoCombate.jugador.estado === 'normal') {
+        const ataquesEstado = ataques.filter(a => a.estado);
+        if (ataquesEstado.length > 0 && Math.random() < 0.7) {
+            // 70% de probabilidad de intentar aplicar estado si el jugador está normal
+            return ataquesEstado[Math.floor(Math.random() * ataquesEstado.length)];
+        }
+    }
+    // Si el jugador está paralizado o dormido, priorizar ataques de mayor efectividad
+    let mejorAtaque = ataques[0];
+    let mejorEfectividad = 0;
+    for (const ataque of ataques) {
+        if (ataque.poder > 0 && ataque.efectividad > mejorEfectividad) {
+            mejorAtaque = ataque;
+            mejorEfectividad = ataque.efectividad;
+        }
+    }
+    // 70% de probabilidad de usar el ataque más efectivo, 30% aleatorio
+    if (Math.random() < 0.7) {
+        return mejorAtaque;
+    } else {
+        return ataques[Math.floor(Math.random() * ataques.length)];
+    }
 }
 
 // Ejecutar acción del oponente al inicio de su turno
