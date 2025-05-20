@@ -21,6 +21,11 @@
     <header>
         <h1>Proyectos de Inteligencia Artificial</h1>
         <p>Innovación y tecnología al servicio de tus ideas</p>
+        <!-- Música relajante de fondo -->
+        <audio controls autoplay loop style="margin-top:1rem; width: 100%; max-width: 400px;">
+            <source src="https://cdn.pixabay.com/audio/2022/10/16/audio_12b6b1b6c7.mp3" type="audio/mpeg">
+            Tu navegador no soporta el elemento de audio.
+        </audio>
     </header>
     <nav>
         <a href="#quienes-somos">Quiénes somos</a>
@@ -64,16 +69,5 @@
     <footer>
         &copy; 2025 Proyectos IA. Todos los derechos reservados.
     </footer>
-    <!-- Música relajante de fondo -->
-    <audio id="relaxing-music" src="https://cdn.pixabay.com/audio/2022/10/16/audio_12c6b6b6b6.mp3" autoplay loop volume="0.3"></audio>
-    <script>
-      // Ajuste de volumen y autoplay para navegadores modernos
-      const audio = document.getElementById('relaxing-music');
-      audio.volume = 0.3;
-      // Algunos navegadores requieren interacción del usuario para reproducir audio
-      document.addEventListener('click', () => {
-        if (audio.paused) audio.play();
-      }, { once: true });
-    </script>
 </body>
 </html>
