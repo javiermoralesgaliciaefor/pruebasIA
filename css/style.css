@@ -9,3 +9,39 @@ h1 {
     text-align: center;
     margin-top: 40px;
 }
+
+/* Áreas de combate usando CSS Grid */
+.battlefield-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    max-width: 900px;
+    margin: 60px auto 0 auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+.battlefield {
+    background: #e3eafc;
+    border: 2px solid #4a90e2;
+    border-radius: 12px;
+    padding: 32px 20px;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+.battlefield h2 {
+    margin-top: 0;
+    color: #205081;
+    font-size: 1.5em;
+    margin-bottom: 24px;
+}
+.battlefield.player {
+    box-shadow: 0 2px 12px rgba(34,139,34,0.08);
+}
+.battlefield.opponent {
+    box-shadow: 0 2px 12px rgba(220,20,60,0.08);
+}
