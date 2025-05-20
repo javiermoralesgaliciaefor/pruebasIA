@@ -139,9 +139,37 @@ function aplicarDanio(objetivo, danio) {
     return objetivo.hp;
 }
 
+// Actualiza la info y barra de vida de ambos Pokémon
+function actualizarInfoPokemon() {
+    // Jugador
+    document.getElementById('nombre-jugador').textContent = estadoCombate.jugador.nombre;
+    document.getElementById('nivel-jugador').textContent = `Nv. ${estadoCombate.jugador.nivel || 50}`;
+    const hpJugador = estadoCombate.jugador.hp ?? estadoCombate.jugador.hpMax ?? 100;
+    const hpMaxJugador = estadoCombate.jugador.hpMax ?? 100;
+    document.getElementById('hp-jugador').textContent = `HP: ${hpJugador}/${hpMaxJugador}`;
+    document.getElementById('vida-jugador').style.width = `${(hpJugador/hpMaxJugador)*100}%`;
+
+    // Oponente
+    document.getElementById('nombre-oponente').textContent = estadoCombate.oponente.nombre;
+    document.getElementById('nivel-oponente').textContent = `Nv. ${estadoCombate.oponente.nivel || 50}`;
+    const hpOponente = estadoCombate.oponente.hp ?? estadoCombate.oponente.hpMax ?? 100;
+    const hpMaxOponente = estadoCombate.oponente.hpMax ?? 100;
+    document.getElementById('hp-oponente').textContent = `HP: ${hpOponente}/${hpMaxOponente}`;
+    document.getElementById('vida-oponente').style.width = `${(hpOponente/hpMaxOponente)*100}%`;
+}
+
+// Inicializar valores de HP y nivel
+estadoCombate.jugador.hpMax = 100;
+estadoCombate.jugador.hp = 100;
+estadoCombate.jugador.nivel = 50;
+estadoCombate.oponente.hpMax = 100;
+estadoCombate.oponente.hp = 100;
+estadoCombate.oponente.nivel = 50;
+
 document.addEventListener('DOMContentLoaded', () => {
     inicializarCanvasCombate();
     inicializarMenuBatalla();
     determinarPrimerTurno();
+    actualizarInfoPokemon();
     console.log('PruebasIA listo');
 });

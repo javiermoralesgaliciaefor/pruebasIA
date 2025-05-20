@@ -70,3 +70,40 @@ h1 {
     background: linear-gradient(90deg, #205081 60%, #4a90e2 100%);
     transform: translateY(-2px) scale(1.04);
 }
+
+/* Info de Pokémon y barra de vida */
+.pokemon-info {
+    width: 95%;
+    margin: 0 auto 18px auto;
+    background: #f8fafc;
+    border: 1.5px solid #b3c6e0;
+    border-radius: 10px;
+    padding: 10px 14px 8px 14px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+    font-size: 1em;
+}
+.info-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    font-weight: bold;
+}
+.barra-vida {
+    width: 100%;
+    height: 16px;
+    background: #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+.vida {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50 70%, #aeea00 100%);
+    width: 100%;
+    transition: width 0.3s;
+}
+.hp-texto {
+    font-size: 0.98em;
+    color: #205081;
+    text-align: right;
+}
