@@ -447,6 +447,24 @@ async function reproducirSonidoAtaque() {
     reproducirBuffer(sonidoAtaqueBuffer, false, 0.7);
 }
 
+// Llenar el desplegable con Pokémon de la PokéAPI
+async function poblarSelectorPokemon() {
+    const select = document.getElementById('select-pokemon');
+    if (!select) return;
+    select.innerHTML = '<option value="">Cargando...</option>';
+    try {
+        const resp = await fetch('https://pokeapi.co/api/v2/pokemon?limit=151');
+        const data = await resp.json();
+        select.innerHTML = '<option value="">Elige un Pokémon</option>';
+        data.results.forEach((poke, idx) => {
+            const nombre = poke.name.charAt(0).toUpperCase() + poke.name.slice(1);
+            select.innerHTML += `<option value="${poke.name}">${nombre}</option>`;
+        });
+    } catch (e) {
+        select.innerHTML = '<option value="">Error al cargar</option>';
+    }
+}
+
 // Llamar a iniciarMusicaFondo() al cargar la página (requiere interacción del usuario en navegadores modernos)
 document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('click', () => {
@@ -459,5 +477,6 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarMenuBatalla();
     determinarPrimerTurno();
     actualizarInfoPokemon();
+    poblarSelectorPokemon();
     console.log('PruebasIA listo');
 });
