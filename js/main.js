@@ -69,19 +69,56 @@ function inicializarCanvasCombate() {
 }
 
 // Manejo de clics en el menú de batalla
+function manejarAccionAtacar() {
+    if (!estadoCombate.jugador.turno) return;
+    // Simular ataque simple del jugador
+    if (!puedeActuar(estadoCombate.jugador)) {
+        alert(`${estadoCombate.jugador.nombre} no puede moverse por ${efectosEstado[estadoCombate.jugador.estado].nombre}!`);
+        alternarTurno();
+        return;
+    }
+    // Daño simple: usar stats actuales
+    let danio = calcularDanio({
+        ataque: 55, // Puedes mejorar esto usando stats reales
+        defensa: estadoCombate.oponente.hpMax ? 45 : 40,
+        efectividad: 1
+    });
+    danio = modificarDanioPorEstado(estadoCombate.jugador, danio);
+    animarAtaqueCanvas({
+        atacante: 'jugador',
+        objetivo: 'oponente',
+        tipo: 'linea',
+        callback: () => {
+            reproducirSonidoAtaque();
+            aplicarDanio(estadoCombate.oponente, danio);
+            actualizarInfoPokemon();
+            alert(`${estadoCombate.jugador.nombre} atacó y causó ${danio} de daño!`);
+            alternarTurno();
+        }
+    });
+}
+
+function manejarAccionMochila() {
+    alert('¡Abriste la mochila! (Funcionalidad de objetos no implementada)');
+}
+
+function manejarAccionHuir() {
+    // Probabilidad simple de huida
+    if (Math.random() < 0.5) {
+        alert('¡Has huido con éxito!');
+        // Reiniciar combate o recargar página
+        window.location.reload();
+    } else {
+        alert('¡No pudiste huir!');
+        alternarTurno();
+    }
+}
+
 function inicializarMenuBatalla() {
-    document.getElementById('btn-atacar').addEventListener('click', () => {
-        alert('¡Atacar!');
-    });
-    document.getElementById('btn-pokemon').addEventListener('click', () => {
-        alert('Abrir menú de Pokémon');
-    });
-    document.getElementById('btn-mochila').addEventListener('click', () => {
-        alert('Abrir mochila');
-    });
-    document.getElementById('btn-huir').addEventListener('click', () => {
-        alert('Intentar huir...');
-    });
+    document.getElementById('btn-atacar').onclick = manejarAccionAtacar;
+    document.getElementById('btn-mochila').onclick = manejarAccionMochila;
+    document.getElementById('btn-huir').onclick = manejarAccionHuir;
+    document.getElementById('btn-pokemon').onclick = () => alert('Abrir menú de Pokémon (no implementado)');
 }
 
 // Lógica de turnos y velocidad
