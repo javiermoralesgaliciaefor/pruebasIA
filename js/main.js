@@ -1,17 +1,14 @@
-// Dibuja el fondo, sprites de Pokémon y efectos básicos en un canvas
+// Modificar dibujarCombate para mostrar sprites en vez de círculos
 function dibujarCombate(canvas, opciones) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    // Limpiar canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     // Fondo simple (degradado)
     const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    grad.addColorStop(0, '#b3e0ff'); // azul cielo
-    grad.addColorStop(1, '#e6ffe6'); // verde claro
+    grad.addColorStop(0, '#b3e0ff');
+    grad.addColorStop(1, '#e6ffe6');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     // Efecto de suelo (elipse)
     ctx.save();
     ctx.beginPath();
@@ -20,28 +17,49 @@ function dibujarCombate(canvas, opciones) {
     ctx.fillStyle = 'rgba(80,80,80,0.18)';
     ctx.fill();
     ctx.restore();
-
-    // Sprites de Pokémon (simples círculos de colores, reemplazar por imágenes si se desea)
+    // Sprites de Pokémon
     // Jugador
-    ctx.save();
-    ctx.beginPath();
     let offset = opciones?.offset || 0;
-    ctx.arc(canvas.width * 0.25 + (offset || 0), canvas.height * 0.65, 38, 0, 2 * Math.PI);
-    ctx.fillStyle = opciones?.jugadorColor || '#ffcb05';
-    ctx.shadowColor = '#333';
-    ctx.shadowBlur = 12;
-    ctx.fill();
-    ctx.restore();
+    let jugadorSprite = estadoCombate.jugador.sprite;
+    let oponenteSprite = estadoCombate.oponente.sprite;
+    // Jugador
+    if (jugadorSprite) {
+        const img = new window.Image();
+        img.src = jugadorSprite;
+        img.onload = function() {
+            ctx.save();
+            ctx.drawImage(img, canvas.width * 0.25 - 48 + (offset || 0), canvas.height * 0.65 - 48, 96, 96);
+            ctx.restore();
+        };
+    } else {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(canvas.width * 0.25 + (offset || 0), canvas.height * 0.65, 38, 0, 2 * Math.PI);
+        ctx.fillStyle = opciones?.jugadorColor || '#ffcb05';
+        ctx.shadowColor = '#333';
+        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.restore();
+    }
     // Oponente
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(canvas.width * 0.75 - (offset || 0), canvas.height * 0.25, 38, 0, 2 * Math.PI);
-    ctx.fillStyle = opciones?.oponenteColor || '#3b4cca';
-    ctx.shadowColor = '#222';
-    ctx.shadowBlur = 12;
-    ctx.fill();
-    ctx.restore();
-
+    if (oponenteSprite) {
+        const img = new window.Image();
+        img.src = oponenteSprite;
+        img.onload = function() {
+            ctx.save();
+            ctx.drawImage(img, canvas.width * 0.75 - 48 - (offset || 0), canvas.height * 0.25 - 48, 96, 96);
+            ctx.restore();
+        };
+    } else {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(canvas.width * 0.75 - (offset || 0), canvas.height * 0.25, 38, 0, 2 * Math.PI);
+        ctx.fillStyle = opciones?.oponenteColor || '#3b4cca';
+        ctx.shadowColor = '#222';
+        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.restore();
+    }
     // Efecto básico: destello entre ambos (línea blanca)
     ctx.save();
     ctx.strokeStyle = 'rgba(255,255,255,0.7)';
@@ -335,27 +353,37 @@ function actualizarTurnos() {
     envTurnoAnterior = estadoCombate.turnoActual;
 }
 
-// Animación de ataque en Canvas
+// Animación de ataque y daño usando sprites, mejorada
 function animarAtaqueCanvas({ atacante, objetivo, tipo = 'linea', callback }) {
-    // atacante: 'jugador' u 'oponente'
-    // tipo: 'linea', 'parpadeo', 'desplazamiento'
-    // callback: función a llamar al terminar la animación
     const idxAtacante = atacante === 'jugador' ? 0 : 1;
     const idxObjetivo = atacante === 'jugador' ? 1 : 0;
     const canvas = document.querySelectorAll('.battlefield canvas')[idxObjetivo];
     if (!canvas) { if (callback) callback(); return; }
     const ctx = canvas.getContext('2d');
     let frame = 0;
-    const maxFrames = 18;
     let animInterval;
-
+    // Parámetros para animaciones
+    const maxFramesLinea = 22;
+    const maxFramesParpadeo = 16;
+    const maxFramesDesplazamiento = 24;
     if (tipo === 'linea') {
-        // Línea de energía que va del atacante al objetivo
+        // Línea de energía con destellos y vibración
         animInterval = setInterval(() => {
-            dibujarCombate(canvas, idxObjetivo === 0 ? {jugadorColor:'#ffcb05', oponenteColor:'#3b4cca'} : {jugadorColor:'#3b4cca', oponenteColor:'#ffcb05'});
+            dibujarCombate(canvas, {offset: 0});
+            // Vibración del objetivo
+            if (frame > maxFramesLinea * 0.6) {
+                let vibra = Math.sin(frame * 2) * 4;
+                dibujarCombate(canvas, {offset: 0});
+                ctx.save();
+                ctx.translate(0, vibra);
+                ctx.restore();
+            }
+            // Línea animada
             ctx.save();
-            ctx.strokeStyle = `rgba(255,0,0,${0.7 - frame*0.03})`;
-            ctx.lineWidth = 4 + Math.sin(frame/2)*2;
+            ctx.strokeStyle = `rgba(255,${80+Math.floor(Math.random()*175)},0,${0.7 - frame*0.025})`;
+            ctx.shadowColor = '#ff0';
+            ctx.shadowBlur = 16;
+            ctx.lineWidth = 5 + Math.sin(frame/2)*2;
             ctx.beginPath();
             if (atacante === 'jugador') {
                 ctx.moveTo(canvas.width * 0.25, canvas.height * 0.65);
@@ -366,39 +394,53 @@ function animarAtaqueCanvas({ atacante, objetivo, tipo = 'linea', callback }) {
             }
             ctx.stroke();
             ctx.restore();
-            frame++;
-            if (frame > maxFrames) { clearInterval(animInterval); if (callback) callback(); }
-        }, 22);
-    } else if (tipo === 'parpadeo') {
-        // Parpadeo del sprite objetivo
-        animInterval = setInterval(() => {
-            dibujarCombate(canvas, idxObjetivo === 0 ? {jugadorColor:'#ffcb05', oponenteColor:'#3b4cca'} : {jugadorColor:'#3b4cca', oponenteColor:'#ffcb05'});
-            if (frame % 2 === 0) {
+            // Destello al final
+            if (frame === Math.floor(maxFramesLinea * 0.7)) {
                 ctx.save();
-                ctx.globalAlpha = 0.2;
-                ctx.fillStyle = '#fff';
+                ctx.globalAlpha = 0.7;
                 ctx.beginPath();
                 if (idxObjetivo === 0) {
-                    ctx.arc(canvas.width * 0.25, canvas.height * 0.65, 38, 0, 2 * Math.PI);
+                    ctx.arc(canvas.width * 0.25, canvas.height * 0.65, 48, 0, 2 * Math.PI);
                 } else {
-                    ctx.arc(canvas.width * 0.75, canvas.height * 0.25, 38, 0, 2 * Math.PI);
+                    ctx.arc(canvas.width * 0.75, canvas.height * 0.25, 48, 0, 2 * Math.PI);
                 }
+                ctx.fillStyle = '#fffbe6';
+                ctx.shadowColor = '#ff0';
+                ctx.shadowBlur = 32;
                 ctx.fill();
                 ctx.restore();
             }
             frame++;
-            if (frame > maxFrames) { clearInterval(animInterval); if (callback) callback(); }
-        }, 40);
+            if (frame > maxFramesLinea) { clearInterval(animInterval); if (callback) callback(); }
+        }, 18);
+    } else if (tipo === 'parpadeo') {
+        // Parpadeo blanco y vibración
+        animInterval = setInterval(() => {
+            let vibra = Math.sin(frame * 3) * 6;
+            dibujarCombate(canvas, {offset: 0});
+            ctx.save();
+            ctx.globalAlpha = 0.4 + 0.2 * Math.sin(frame);
+            ctx.fillStyle = '#fff';
+            if (idxObjetivo === 0) {
+                ctx.fillRect(canvas.width * 0.25 - 48, canvas.height * 0.65 - 48 + vibra, 96, 96);
+            } else {
+                ctx.fillRect(canvas.width * 0.75 - 48, canvas.height * 0.25 - 48 + vibra, 96, 96);
+            }
+            ctx.restore();
+            frame++;
+            if (frame > maxFramesParpadeo) { clearInterval(animInterval); if (callback) callback(); }
+        }, 28);
     } else if (tipo === 'desplazamiento') {
-        // Sprite atacante se desplaza hacia el objetivo y regresa
+        // Desplazamiento con rebote
         const canvasAtacante = document.querySelectorAll('.battlefield canvas')[idxAtacante];
         let dir = 1;
         animInterval = setInterval(() => {
-            let offset = dir * (frame < maxFrames/2 ? frame : maxFrames-frame) * 4;
-            dibujarCombate(canvasAtacante, idxAtacante === 0 ? {jugadorColor:'#ffcb05', oponenteColor:'#3b4cca', offset: offset} : {jugadorColor:'#3b4cca', oponenteColor:'#ffcb05', offset: offset});
+            let t = frame / maxFramesDesplazamiento;
+            let offset = Math.sin(Math.PI * t) * 60; // Rebote
+            dibujarCombate(canvasAtacante, {offset: dir * offset});
             frame++;
-            if (frame > maxFrames) { clearInterval(animInterval); dibujarCombate(canvasAtacante, idxAtacante === 0 ? {jugadorColor:'#ffcb05', oponenteColor:'#3b4cca'} : {jugadorColor:'#3b4cca', oponenteColor:'#ffcb05'}); if (callback) callback(); }
-        }, 18);
+            if (frame > maxFramesDesplazamiento) { clearInterval(animInterval); dibujarCombate(canvasAtacante, {offset: 0}); if (callback) callback(); }
+        }, 16);
     } else {
         if (callback) callback();
     }
