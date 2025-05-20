@@ -520,14 +520,13 @@ async function poblarSelectorOponente() {
     }
 }
 
-// Cambiar datos del jugador al seleccionar un Pokémon
+// Guardar url de sprite al seleccionar Pokémon
 function manejarCambioPokemonJugador() {
     const select = document.getElementById('select-pokemon');
     if (!select) return;
     select.addEventListener('change', async (e) => {
         const nombre = select.value;
         if (!nombre) return;
-        // Obtener datos del Pokémon de la PokéAPI
         const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${nombre}`);
         const data = await resp.json();
         estadoCombate.jugador.nombre = data.name.charAt(0).toUpperCase() + data.name.slice(1);
@@ -535,21 +534,19 @@ function manejarCambioPokemonJugador() {
         estadoCombate.jugador.hp = estadoCombate.jugador.hpMax;
         estadoCombate.jugador.nivel = 50;
         estadoCombate.jugador.velocidad = data.stats.find(s => s.stat.name === 'speed').base_stat;
-        // Puedes agregar más stats si lo deseas
+        estadoCombate.jugador.sprite = data.sprites.front_default;
         actualizarInfoPokemon();
-        // Animar ingreso
         animarIngresoPokemon({ quien: 'jugador' });
+        mostrarSpritePokemon('jugador');
     });
 }
 
-// Cambiar datos del oponente al seleccionar un Pokémon
 function manejarCambioPokemonOponente() {
     const select = document.getElementById('select-oponente');
     if (!select) return;
     select.addEventListener('change', async (e) => {
         const nombre = select.value;
         if (!nombre) return;
-        // Obtener datos del Pokémon de la PokéAPI
         const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${nombre}`);
         const data = await resp.json();
         estadoCombate.oponente.nombre = data.name.charAt(0).toUpperCase() + data.name.slice(1);
@@ -557,9 +554,29 @@ function manejarCambioPokemonOponente() {
         estadoCombate.oponente.hp = estadoCombate.oponente.hpMax;
         estadoCombate.oponente.nivel = 50;
         estadoCombate.oponente.velocidad = data.stats.find(s => s.stat.name === 'speed').base_stat;
+        estadoCombate.oponente.sprite = data.sprites.front_default;
         actualizarInfoPokemon();
         animarIngresoPokemon({ quien: 'oponente' });
+        mostrarSpritePokemon('oponente');
     });
+}
+
+// Mostrar sprite en el área correspondiente
+function mostrarSpritePokemon(quien) {
+    const area = document.querySelector(`.battlefield.${quien === 'jugador' ? 'player' : 'opponent'}`);
+    if (!area) return;
+    let img = area.querySelector('.pokemon-sprite');
+    if (!img) {
+        img = document.createElement('img');
+        img.className = 'pokemon-sprite';
+        img.style.maxWidth = '96px';
+        img.style.maxHeight = '96px';
+        img.style.display = 'block';
+        img.style.margin = '8px auto 0 auto';
+        area.appendChild(img);
+    }
+    img.src = estadoCombate[quien].sprite || '';
+    img.alt = estadoCombate[quien].nombre;
 }
 
 // Llamar a iniciarMusicaFondo() al cargar la página (requiere interacción del usuario en navegadores modernos)
