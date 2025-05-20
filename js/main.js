@@ -98,6 +98,49 @@ const estadoCombate = {
     turnoActual: null // 'jugador' o 'oponente'
 };
 
+// Efectos de estado
+const efectosEstado = {
+    paralisis: {
+        nombre: 'Parálisis',
+        afectaTurno: true, // Puede perder el turno
+        probabilidad: 0.25, // 25% de perder el turno
+        modificarDanio: danio => danio // No afecta el daño
+    },
+    dormido: {
+        nombre: 'Dormido',
+        afectaTurno: true,
+        probabilidad: 1, // Siempre pierde el turno
+        modificarDanio: danio => danio
+    },
+    quemadura: {
+        nombre: 'Quemadura',
+        afectaTurno: false,
+        modificarDanio: danio => Math.floor(danio / 2) // Daño reducido a la mitad
+    },
+    normal: {
+        nombre: '',
+        afectaTurno: false,
+        modificarDanio: danio => danio
+    }
+};
+
+// Añadir estado a los Pokémon
+estadoCombate.jugador.estado = 'normal';
+estadoCombate.oponente.estado = 'normal';
+
+function puedeActuar(pokemon) {
+    const estado = efectosEstado[pokemon.estado] || efectosEstado.normal;
+    if (estado.afectaTurno) {
+        return Math.random() > estado.probabilidad;
+    }
+    return true;
+}
+
+function modificarDanioPorEstado(pokemon, danio) {
+    const estado = efectosEstado[pokemon.estado] || efectosEstado.normal;
+    return estado.modificarDanio(danio);
+}
+
 function determinarPrimerTurno() {
     if (estadoCombate.jugador.velocidad > estadoCombate.oponente.velocidad) {
         estadoCombate.turnoActual = 'jugador';
