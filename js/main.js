@@ -83,8 +83,48 @@ function inicializarMenuBatalla() {
     });
 }
 
+// Lógica de turnos y velocidad
+const estadoCombate = {
+    jugador: {
+        nombre: 'Pikachu',
+        velocidad: 90,
+        turno: false
+    },
+    oponente: {
+        nombre: 'Charmander',
+        velocidad: 65,
+        turno: false
+    },
+    turnoActual: null // 'jugador' o 'oponente'
+};
+
+function determinarPrimerTurno() {
+    if (estadoCombate.jugador.velocidad > estadoCombate.oponente.velocidad) {
+        estadoCombate.turnoActual = 'jugador';
+    } else if (estadoCombate.jugador.velocidad < estadoCombate.oponente.velocidad) {
+        estadoCombate.turnoActual = 'oponente';
+    } else {
+        // Si hay empate, el jugador comienza
+        estadoCombate.turnoActual = 'jugador';
+    }
+    actualizarTurnos();
+}
+
+function alternarTurno() {
+    estadoCombate.turnoActual = estadoCombate.turnoActual === 'jugador' ? 'oponente' : 'jugador';
+    actualizarTurnos();
+}
+
+function actualizarTurnos() {
+    estadoCombate.jugador.turno = estadoCombate.turnoActual === 'jugador';
+    estadoCombate.oponente.turno = estadoCombate.turnoActual === 'oponente';
+    // Aquí puedes actualizar la UI si lo deseas
+    console.log(`Turno de: ${estadoCombate.turnoActual}`);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     inicializarCanvasCombate();
     inicializarMenuBatalla();
+    determinarPrimerTurno();
     console.log('PruebasIA listo');
 });
