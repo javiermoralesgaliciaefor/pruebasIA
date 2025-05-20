@@ -158,13 +158,6 @@ function alternarTurno() {
     actualizarTurnos();
 }
 
-function actualizarTurnos() {
-    estadoCombate.jugador.turno = estadoCombate.turnoActual === 'jugador';
-    estadoCombate.oponente.turno = estadoCombate.turnoActual === 'oponente';
-    // Aquí puedes actualizar la UI si lo deseas
-    console.log(`Turno de: ${estadoCombate.turnoActual}`);
-}
-
 // Cálculo de daño y reducción de HP
 function calcularDanio({ataque, defensa, efectividad = 1}) {
     // Fórmula básica de daño Pokémon
@@ -208,6 +201,79 @@ estadoCombate.jugador.nivel = 50;
 estadoCombate.oponente.hpMax = 100;
 estadoCombate.oponente.hp = 100;
 estadoCombate.oponente.nivel = 50;
+
+// Definir ataques posibles para el oponente
+estadoCombate.oponente.ataques = [
+    {
+        nombre: 'Ascuas',
+        poder: 20,
+        tipo: 'fuego',
+        efectividad: 1,
+        estado: null // Sin efecto secundario
+    },
+    {
+        nombre: 'Arañazo',
+        poder: 15,
+        tipo: 'normal',
+        efectividad: 1,
+        estado: null
+    },
+    {
+        nombre: 'Pantalla de Humo',
+        poder: 0,
+        tipo: 'normal',
+        efectividad: 1,
+        estado: 'paralisis' // Aplica parálisis
+    }
+];
+
+// Elegir ataque al azar
+function elegirAtaqueOponente() {
+    const ataques = estadoCombate.oponente.ataques;
+    return ataques[Math.floor(Math.random() * ataques.length)];
+}
+
+// Ejecutar acción del oponente al inicio de su turno
+function turnoOponente() {
+    if (!puedeActuar(estadoCombate.oponente)) {
+        alert(`${estadoCombate.oponente.nombre} no puede moverse por ${efectosEstado[estadoCombate.oponente.estado].nombre}!`);
+        alternarTurno();
+        return;
+    }
+    const ataque = elegirAtaqueOponente();
+    let mensaje = `${estadoCombate.oponente.nombre} usó ${ataque.nombre}!`;
+    let danio = 0;
+    if (ataque.poder > 0) {
+        danio = calcularDanio({
+            ataque: 52, // Ataque base de ejemplo
+            defensa: 40, // Defensa del jugador
+            efectividad: ataque.efectividad
+        });
+        danio = modificarDanioPorEstado(estadoCombate.oponente, danio);
+        aplicarDanio(estadoCombate.jugador, danio);
+        mensaje += ` ¡Causó ${danio} de daño!`;
+    }
+    if (ataque.estado) {
+        estadoCombate.jugador.estado = ataque.estado;
+        mensaje += ` ¡${estadoCombate.jugador.nombre} está ${efectosEstado[ataque.estado].nombre}!`;
+    }
+    actualizarInfoPokemon();
+    alert(mensaje);
+    alternarTurno();
+}
+
+// Llamar a turnoOponente al inicio del turno del oponente
+envTurnoAnterior = null;
+function actualizarTurnos() {
+    estadoCombate.jugador.turno = estadoCombate.turnoActual === 'jugador';
+    estadoCombate.oponente.turno = estadoCombate.turnoActual === 'oponente';
+    // Aquí puedes actualizar la UI si lo deseas
+    console.log(`Turno de: ${estadoCombate.turnoActual}`);
+    if (estadoCombate.turnoActual === 'oponente' && envTurnoAnterior !== 'oponente') {
+        setTimeout(turnoOponente, 600); // Pequeña pausa para UX
+    }
+    envTurnoAnterior = estadoCombate.turnoActual;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     inicializarCanvasCombate();
