@@ -3,58 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proyecto PruebasIA</title>
+    <title>Combate Pokémon</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <h1>Bienvenido a PruebasIA</h1>
-    <div class="battlefield-container">
-        <div class="pokemon-selector">
-            <label for="select-pokemon">Elegir Pokémon:</label>
-            <select id="select-pokemon">
-                <option value="">Cargando...</option>
-            </select>
-        </div>
-        <div class="battlefield player">
-            <h2>Jugador</h2>
-            <div class="pokemon-info" id="info-jugador">
-                <div class="info-header">
-                    <span class="nombre" id="nombre-jugador">Pikachu</span>
-                    <span class="nivel" id="nivel-jugador">Nv. 50</span>
-                </div>
-                <div class="barra-vida">
-                    <div class="vida" id="vida-jugador"></div>
-                </div>
-                <div class="hp-texto" id="hp-jugador">HP: 100/100</div>
+    <div class="pokemon-ui">
+        <div class="pokemon-bar player-bar">
+            <span class="nombre" id="nombre-jugador">Pikachu</span>
+            <span class="nivel" id="nivel-jugador">Nv. 50</span>
+            <div class="barra-vida">
+                <div class="vida" id="vida-jugador"></div>
             </div>
-            <!-- Aquí puedes agregar elementos del área de combate del jugador -->
+            <span class="hp-texto" id="hp-jugador">HP: 100/100</span>
         </div>
-        <div class="pokemon-selector">
-            <label for="select-oponente">Elegir Oponente:</label>
-            <select id="select-oponente">
-                <option value="">Cargando...</option>
-            </select>
-        </div>
-        <div class="battlefield opponent">
-            <h2>Oponente</h2>
-            <div class="pokemon-info" id="info-oponente">
-                <div class="info-header">
-                    <span class="nombre" id="nombre-oponente">Charmander</span>
-                    <span class="nivel" id="nivel-oponente">Nv. 50</span>
-                </div>
-                <div class="barra-vida">
-                    <div class="vida" id="vida-oponente"></div>
-                </div>
-                <div class="hp-texto" id="hp-oponente">HP: 100/100</div>
+        <div class="pokemon-bar opponent-bar">
+            <span class="nombre" id="nombre-oponente">Charmander</span>
+            <span class="nivel" id="nivel-oponente">Nv. 50</span>
+            <div class="barra-vida">
+                <div class="vida" id="vida-oponente"></div>
             </div>
-            <!-- Aquí puedes agregar elementos del área de combate del oponente -->
+            <span class="hp-texto" id="hp-oponente">HP: 100/100</span>
         </div>
+        <canvas id="battle-canvas" width="480" height="320"></canvas>
         <div class="battle-menu">
             <button class="battle-btn" id="btn-atacar">Atacar</button>
-            <button class="battle-btn" id="btn-pokemon">Pokémon</button>
             <button class="battle-btn" id="btn-mochila">Mochila</button>
             <button class="battle-btn" id="btn-huir">Huir</button>
         </div>
+        <div class="victory-message" id="victory-message" style="display:none;"></div>
     </div>
     <script src="js/main.js"></script>
 </body>

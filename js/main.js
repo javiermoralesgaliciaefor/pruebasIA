@@ -1,3 +1,111 @@
+// Dibuja el combate en un solo canvas estilo Pokémon
+function dibujarCombateCanvasPrincipal({ anim = {}, mostrarVictoria = false, mensajeVictoria = '' } = {}) {
+    const canvas = document.getElementById('battle-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Fondo y suelo
+    ctx.fillStyle = '#b3e0ff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(110, 250, 70, 22, 0, 0, 2 * Math.PI);
+    ctx.ellipse(370, 110, 70, 22, 0, 0, 2 * Math.PI);
+    ctx.fillStyle = 'rgba(80,80,80,0.18)';
+    ctx.fill();
+    ctx.restore();
+    // Sprites
+    // Jugador (abajo izquierda)
+    let offsetJ = anim.offsetJ || 0;
+    let vibraJ = anim.vibraJ || 0;
+    let alphaJ = anim.alphaJ !== undefined ? anim.alphaJ : 1;
+    if (estadoCombate.jugador.sprite) {
+        const imgJ = new window.Image();
+        imgJ.src = estadoCombate.jugador.sprite;
+        imgJ.onload = function() {
+            ctx.save();
+            ctx.globalAlpha = alphaJ;
+            ctx.drawImage(imgJ, 110 - 48 + offsetJ, 170 - 48 + vibraJ, 96, 96);
+            ctx.restore();
+        };
+        if (imgJ.complete) {
+            ctx.save();
+            ctx.globalAlpha = alphaJ;
+            ctx.drawImage(imgJ, 110 - 48 + offsetJ, 170 - 48 + vibraJ, 96, 96);
+            ctx.restore();
+        }
+    }
+    // Oponente (arriba derecha)
+    let offsetO = anim.offsetO || 0;
+    let vibraO = anim.vibraO || 0;
+    let alphaO = anim.alphaO !== undefined ? anim.alphaO : 1;
+    if (estadoCombate.oponente.sprite) {
+        const imgO = new window.Image();
+        imgO.src = estadoCombate.oponente.sprite;
+        imgO.onload = function() {
+            ctx.save();
+            ctx.globalAlpha = alphaO;
+            ctx.drawImage(imgO, 370 - 48 + offsetO, 40 - 48 + vibraO, 96, 96);
+            ctx.restore();
+        };
+        if (imgO.complete) {
+            ctx.save();
+            ctx.globalAlpha = alphaO;
+            ctx.drawImage(imgO, 370 - 48 + offsetO, 40 - 48 + vibraO, 96, 96);
+            ctx.restore();
+        }
+    }
+    // Animación de victoria
+    if (mostrarVictoria) {
+        ctx.save();
+        ctx.globalAlpha = 0.92;
+        ctx.fillStyle = '#222';
+        ctx.fillRect(0, canvas.height/2 - 40, canvas.width, 80);
+        ctx.globalAlpha = 1;
+        ctx.font = 'bold 32px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.fillText(mensajeVictoria, canvas.width/2, canvas.height/2 + 12);
+        ctx.restore();
+    }
+}
+
+// Animación de victoria
+function mostrarAnimacionVictoria(mensaje) {
+    const div = document.getElementById('victory-message');
+    div.textContent = mensaje;
+    div.style.display = 'block';
+    let frame = 0;
+    const canvas = document.getElementById('battle-canvas');
+    function anim() {
+        dibujarCombateCanvasPrincipal({ mostrarVictoria: true, mensajeVictoria: mensaje });
+        frame++;
+        if (frame < 80) {
+            requestAnimationFrame(anim);
+        }
+    }
+    anim();
+}
+
+// Detectar KO y mostrar victoria
+function verificarKO() {
+    if (estadoCombate.jugador.hp <= 0) {
+        mostrarAnimacionVictoria('¡Has perdido!');
+        deshabilitarMenuBatalla();
+        return true;
+    }
+    if (estadoCombate.oponente.hp <= 0) {
+        mostrarAnimacionVictoria('¡Victoria!');
+        deshabilitarMenuBatalla();
+        return true;
+    }
+    return false;
+}
+
+function deshabilitarMenuBatalla() {
+    document.querySelectorAll('.battle-btn').forEach(btn => btn.disabled = true);
+}
+
 // Modificar dibujarCombate para mostrar sprites en vez de círculos
 function dibujarCombate(canvas, opciones) {
     if (!canvas) return;
@@ -89,29 +197,27 @@ function inicializarCanvasCombate() {
 // Manejo de clics en el menú de batalla
 function manejarAccionAtacar() {
     if (!estadoCombate.jugador.turno) return;
-    // Simular ataque simple del jugador
     if (!puedeActuar(estadoCombate.jugador)) {
         alert(`${estadoCombate.jugador.nombre} no puede moverse por ${efectosEstado[estadoCombate.jugador.estado].nombre}!`);
         alternarTurno();
         return;
     }
-    // Daño simple: usar stats actuales
     let danio = calcularDanio({
-        ataque: 55, // Puedes mejorar esto usando stats reales
+        ataque: 55,
         defensa: estadoCombate.oponente.hpMax ? 45 : 40,
         efectividad: 1
     });
     danio = modificarDanioPorEstado(estadoCombate.jugador, danio);
-    animarAtaqueCanvas({
+    animarAtaqueCanvasPrincipal({
         atacante: 'jugador',
-        objetivo: 'oponente',
-        tipo: 'linea',
         callback: () => {
             reproducirSonidoAtaque();
             aplicarDanio(estadoCombate.oponente, danio);
             actualizarInfoPokemon();
-            alert(`${estadoCombate.jugador.nombre} atacó y causó ${danio} de daño!`);
-            alternarTurno();
+            if (!verificarKO()) {
+                alert(`${estadoCombate.jugador.nombre} atacó y causó ${danio} de daño!`);
+                alternarTurno();
+            }
         }
     });
 }
@@ -248,6 +354,7 @@ function actualizarInfoPokemon() {
     const hpMaxOponente = estadoCombate.oponente.hpMax ?? 100;
     document.getElementById('hp-oponente').textContent = `HP: ${hpOponente}/${hpMaxOponente}`;
     document.getElementById('vida-oponente').style.width = `${(hpOponente/hpMaxOponente)*100}%`;
+    dibujarCombateCanvasPrincipal();
 }
 
 // Inicializar valores de HP y nivel
@@ -338,6 +445,7 @@ function turnoOponente() {
     actualizarInfoPokemon();
     alert(mensaje);
     alternarTurno();
+    verificarKO();
 }
 
 // Llamar a turnoOponente al inicio del turno del oponente
@@ -444,6 +552,29 @@ function animarAtaqueCanvas({ atacante, objetivo, tipo = 'linea', callback }) {
     } else {
         if (callback) callback();
     }
+}
+
+// Animación de ataque en el canvas principal
+function animarAtaqueCanvasPrincipal({ atacante, callback }) {
+    let frame = 0;
+    const maxFrames = 18;
+    function anim() {
+        let animObj = {};
+        if (atacante === 'jugador') {
+            animObj = { offsetJ: Math.sin(Math.PI * frame / maxFrames) * 60 };
+        } else {
+            animObj = { offsetO: -Math.sin(Math.PI * frame / maxFrames) * 60 };
+        }
+        dibujarCombateCanvasPrincipal({ anim: animObj });
+        frame++;
+        if (frame <= maxFrames) {
+            requestAnimationFrame(anim);
+        } else {
+            dibujarCombateCanvasPrincipal();
+            if (callback) callback();
+        }
+    }
+    anim();
 }
 
 // Animación de ingreso de Pokémon
