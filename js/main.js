@@ -367,6 +367,37 @@ function animarAtaqueCanvas({ atacante, objetivo, tipo = 'linea', callback }) {
     }
 }
 
+// Animación de ingreso de Pokémon
+function animarIngresoPokemon({ quien = 'jugador', callback }) {
+    // quien: 'jugador' u 'oponente'
+    const idx = quien === 'jugador' ? 0 : 1;
+    const canvas = document.querySelectorAll('.battlefield canvas')[idx];
+    if (!canvas) { if (callback) callback(); return; }
+    const ctx = canvas.getContext('2d');
+    let frame = 0;
+    const maxFrames = 28;
+    let animInterval;
+    animInterval = setInterval(() => {
+        let offsetX = 0;
+        if (quien === 'jugador') {
+            offsetX = -canvas.width * (1 - frame / maxFrames) * 0.8; // Desde la izquierda
+        } else {
+            offsetX = canvas.width * (1 - frame / maxFrames) * 0.8; // Desde la derecha
+        }
+        dibujarCombate(canvas, idx === 0
+            ? {jugadorColor:'#ffcb05', oponenteColor:'#3b4cca', offset: offsetX}
+            : {jugadorColor:'#3b4cca', oponenteColor:'#ffcb05', offset: offsetX});
+        frame++;
+        if (frame > maxFrames) {
+            clearInterval(animInterval);
+            dibujarCombate(canvas, idx === 0
+                ? {jugadorColor:'#ffcb05', oponenteColor:'#3b4cca'}
+                : {jugadorColor:'#3b4cca', oponenteColor:'#ffcb05'});
+            if (callback) callback();
+        }
+    }, 18);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     inicializarCanvasCombate();
     inicializarMenuBatalla();
