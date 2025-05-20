@@ -156,3 +156,28 @@ h1 {
     box-shadow: 0 2px 16px rgba(0,0,0,0.18);
     z-index: 10;
 }
+
+/* Estilos para los selects de Pokémon */
+.pokemon-selectors {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 18px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.pokemon-selector label {
+    font-weight: bold;
+    margin-right: 6px;
+    color: #205081;
+}
+.pokemon-selector select {
+    font-size: 1em;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1.5px solid #4a90e2;
+    background: #f8fafc;
+    color: #205081;
+}
