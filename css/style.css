@@ -45,3 +45,28 @@ h1 {
 .battlefield.opponent {
     box-shadow: 0 2px 12px rgba(220,20,60,0.08);
 }
+
+/* Menú de batalla */
+.battle-menu {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin: 36px auto 0 auto;
+    max-width: 600px;
+}
+.battle-btn {
+    background: linear-gradient(90deg, #4a90e2 60%, #205081 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 16px 32px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: background 0.2s, transform 0.1s;
+}
+.battle-btn:hover {
+    background: linear-gradient(90deg, #205081 60%, #4a90e2 100%);
+    transform: translateY(-2px) scale(1.04);
+}

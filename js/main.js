@@ -67,7 +67,24 @@ function inicializarCanvasCombate() {
     });
 }
 
+// Manejo de clics en el menú de batalla
+function inicializarMenuBatalla() {
+    document.getElementById('btn-atacar').addEventListener('click', () => {
+        alert('¡Atacar!');
+    });
+    document.getElementById('btn-pokemon').addEventListener('click', () => {
+        alert('Abrir menú de Pokémon');
+    });
+    document.getElementById('btn-mochila').addEventListener('click', () => {
+        alert('Abrir mochila');
+    });
+    document.getElementById('btn-huir').addEventListener('click', () => {
+        alert('Intentar huir...');
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     inicializarCanvasCombate();
+    inicializarMenuBatalla();
     console.log('PruebasIA listo');
 });
