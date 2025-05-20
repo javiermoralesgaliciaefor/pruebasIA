@@ -398,6 +398,62 @@ function animarIngresoPokemon({ quien = 'jugador', callback }) {
     }, 18);
 }
 
+// --- Web Audio API: música de fondo y sonidos de ataque ---
+let audioCtx;
+let musicaBuffer = null;
+let sonidoAtaqueBuffer = null;
+
+function getAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioCtx;
+}
+
+// Cargar un archivo de audio y devolver un buffer
+async function cargarAudioBuffer(url) {
+    const ctx = getAudioContext();
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    return await ctx.decodeAudioData(arrayBuffer);
+}
+
+// Reproducir un buffer de audio
+function reproducirBuffer(buffer, loop = false, volumen = 1) {
+    const ctx = getAudioContext();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = loop;
+    const gain = ctx.createGain();
+    gain.gain.value = volumen;
+    source.connect(gain).connect(ctx.destination);
+    source.start(0);
+    return source;
+}
+
+// Iniciar música de fondo
+async function iniciarMusicaFondo() {
+    if (!musicaBuffer) {
+        musicaBuffer = await cargarAudioBuffer('assets/audio/battle_theme.mp3');
+    }
+    reproducirBuffer(musicaBuffer, true, 0.25);
+}
+
+// Reproducir sonido de ataque
+async function reproducirSonidoAtaque() {
+    if (!sonidoAtaqueBuffer) {
+        sonidoAtaqueBuffer = await cargarAudioBuffer('assets/audio/attack.wav');
+    }
+    reproducirBuffer(sonidoAtaqueBuffer, false, 0.7);
+}
+
+// Llamar a iniciarMusicaFondo() al cargar la página (requiere interacción del usuario en navegadores modernos)
+document.addEventListener('DOMContentLoaded', () => {
+    document.body.addEventListener('click', () => {
+        iniciarMusicaFondo();
+    }, { once: true });
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     inicializarCanvasCombate();
     inicializarMenuBatalla();
