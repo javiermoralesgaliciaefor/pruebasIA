@@ -122,6 +122,23 @@ function actualizarTurnos() {
     console.log(`Turno de: ${estadoCombate.turnoActual}`);
 }
 
+// Cálculo de daño y reducción de HP
+function calcularDanio({ataque, defensa, efectividad = 1}) {
+    // Fórmula básica de daño Pokémon
+    // Daño = ((2 * Nivel / 5 + 2) * Ataque / Defensa * 20 * Efectividad) / 50 + 2
+    // Para simplificar, asumimos nivel 50 y poder base 20
+    const nivel = 50;
+    const poder = 20;
+    const danioBase = (((2 * nivel / 5 + 2) * poder * (ataque / defensa)) / 50 + 2) * efectividad;
+    return Math.floor(danioBase);
+}
+
+function aplicarDanio(objetivo, danio) {
+    if (typeof objetivo.hp === 'undefined') objetivo.hp = objetivo.hpMax || 100;
+    objetivo.hp = Math.max(0, objetivo.hp - danio);
+    return objetivo.hp;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     inicializarCanvasCombate();
     inicializarMenuBatalla();
