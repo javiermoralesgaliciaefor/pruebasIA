@@ -465,6 +465,66 @@ async function poblarSelectorPokemon() {
     }
 }
 
+// Llenar el desplegable de oponente con Pokémon de la PokéAPI
+async function poblarSelectorOponente() {
+    const select = document.getElementById('select-oponente');
+    if (!select) return;
+    select.innerHTML = '<option value="">Cargando...</option>';
+    try {
+        const resp = await fetch('https://pokeapi.co/api/v2/pokemon?limit=151');
+        const data = await resp.json();
+        select.innerHTML = '<option value="">Elige un Pokémon</option>';
+        data.results.forEach((poke, idx) => {
+            const nombre = poke.name.charAt(0).toUpperCase() + poke.name.slice(1);
+            select.innerHTML += `<option value="${poke.name}">${nombre}</option>`;
+        });
+    } catch (e) {
+        select.innerHTML = '<option value="">Error al cargar</option>';
+    }
+}
+
+// Cambiar datos del jugador al seleccionar un Pokémon
+function manejarCambioPokemonJugador() {
+    const select = document.getElementById('select-pokemon');
+    if (!select) return;
+    select.addEventListener('change', async (e) => {
+        const nombre = select.value;
+        if (!nombre) return;
+        // Obtener datos del Pokémon de la PokéAPI
+        const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${nombre}`);
+        const data = await resp.json();
+        estadoCombate.jugador.nombre = data.name.charAt(0).toUpperCase() + data.name.slice(1);
+        estadoCombate.jugador.hpMax = data.stats.find(s => s.stat.name === 'hp').base_stat;
+        estadoCombate.jugador.hp = estadoCombate.jugador.hpMax;
+        estadoCombate.jugador.nivel = 50;
+        estadoCombate.jugador.velocidad = data.stats.find(s => s.stat.name === 'speed').base_stat;
+        // Puedes agregar más stats si lo deseas
+        actualizarInfoPokemon();
+        // Animar ingreso
+        animarIngresoPokemon({ quien: 'jugador' });
+    });
+}
+
+// Cambiar datos del oponente al seleccionar un Pokémon
+function manejarCambioPokemonOponente() {
+    const select = document.getElementById('select-oponente');
+    if (!select) return;
+    select.addEventListener('change', async (e) => {
+        const nombre = select.value;
+        if (!nombre) return;
+        // Obtener datos del Pokémon de la PokéAPI
+        const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${nombre}`);
+        const data = await resp.json();
+        estadoCombate.oponente.nombre = data.name.charAt(0).toUpperCase() + data.name.slice(1);
+        estadoCombate.oponente.hpMax = data.stats.find(s => s.stat.name === 'hp').base_stat;
+        estadoCombate.oponente.hp = estadoCombate.oponente.hpMax;
+        estadoCombate.oponente.nivel = 50;
+        estadoCombate.oponente.velocidad = data.stats.find(s => s.stat.name === 'speed').base_stat;
+        actualizarInfoPokemon();
+        animarIngresoPokemon({ quien: 'oponente' });
+    });
+}
+
 // Llamar a iniciarMusicaFondo() al cargar la página (requiere interacción del usuario en navegadores modernos)
 document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('click', () => {
@@ -478,5 +538,8 @@ document.addEventListener('DOMContentLoaded', () => {
     determinarPrimerTurno();
     actualizarInfoPokemon();
     poblarSelectorPokemon();
+    poblarSelectorOponente();
+    manejarCambioPokemonJugador();
+    manejarCambioPokemonOponente();
     console.log('PruebasIA listo');
 });
