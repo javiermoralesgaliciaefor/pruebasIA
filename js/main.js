@@ -242,7 +242,6 @@ function inicializarMenuBatalla() {
     document.getElementById('btn-atacar').onclick = manejarAccionAtacar;
     document.getElementById('btn-mochila').onclick = manejarAccionMochila;
     document.getElementById('btn-huir').onclick = manejarAccionHuir;
-    document.getElementById('btn-pokemon').onclick = () => alert('Abrir menú de Pokémon (no implementado)');
 }
 
 // Lógica de turnos y velocidad
